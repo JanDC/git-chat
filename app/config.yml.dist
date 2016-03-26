@@ -1,0 +1,4 @@
+repository:
+  name: 'Machine name'
+  url: 'git@....|https://...'
+  type: 'ssh|https'
