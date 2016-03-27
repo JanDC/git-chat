@@ -1,6 +1,6 @@
 <?php
 
-namespace GitChat\Controllers;
+namespace SilexChatProvider\Controller;
 
 use Silex\Application;
 use Silex\ControllerCollection;
@@ -12,7 +12,9 @@ class PageController implements ControllerProviderInterface
 
     public function indexAction(Request $request, Application $app)
     {
-        return 'Foo: bar';
+        $messages = $app['gitchat.chat_service']->getHistory();
+
+        return $app['twig']->render('Page/index.twig', ['messages' => $messages]);
     }
 
     /**
