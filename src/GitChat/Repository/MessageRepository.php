@@ -2,7 +2,6 @@
 
 namespace GitChat\Repository;
 
-
 use GitChat\Model\Message;
 use Gitonomy\Git\Commit;
 
@@ -10,32 +9,21 @@ class MessageRepository extends GitRepository
 {
 
     /**
-     * @param string $message
-     */
-    public function pushMessage($message)
-    {
-        if (empty($message)) {
-            return;
-        }
-        unlink($this->getGitLibRepository()->getWorkingDir() . '/log');
-        file_put_contents($this->getGitLibRepository()->getWorkingDir() . '/log', print_r($this->getGitLibRepository()->getLog()->getCommits(), true));
-        $this->getGitLibRepository()->run('add', ['.']);
-        $this->getGitLibRepository()->run('commit', ['--all', '--message=' . $message . '']);
-        $this->getGitLibRepository()->run('push');
-    }
-
-    /**
      * @param null|integer $limit
+     * @param bool $as_array
      *
      * @return array
      */
     public function getMessages($limit = null, $as_array = false)
     {
         $log = $this->getGitLibRepository()->getLog(null, null, null, $limit);
+
         $commits = $log->getCommits();
+
         $messages = array_map(function (Commit $commit) {
             return $this->parseCommitToMessage($commit);
         }, $commits);
+
         usort($messages, function (Message $message_a, Message $message_b) {
             return $message_a->getTime() > $message_b->getTime();
         });
@@ -47,6 +35,22 @@ class MessageRepository extends GitRepository
         }
 
         return $messages;
+    }
+
+    /**
+     * @param string $message
+     * @param bool $branch
+     */
+    public function pushMessage($message, $branch = false)
+    {
+        if (empty($message)) {
+            return;
+        }
+        if ($this->hasUserCredentials()) {
+            $this->commitAsUser($message, $branch, $this->getMessages(null, true));
+        } else {
+            $this->getGitLibRepository()->run('commit', ['--all', '--message=' . $message . '']);
+        }
     }
 
 

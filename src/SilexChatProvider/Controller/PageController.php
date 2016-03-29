@@ -12,6 +12,7 @@ class PageController implements ControllerProviderInterface
 
     public function indexAction(Request $request, Application $app)
     {
+        $app['gitchat.chat_service']->addMessage('Zomaar een test om '. time());
         $messages = $app['gitchat.chat_service']->getHistory();
 
         return $app['twig']->render('Page/index.twig', ['messages' => $messages]);
